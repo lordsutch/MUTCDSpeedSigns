@@ -24,6 +24,7 @@
 from __future__ import print_function
 
 from multiprocessing import Pool
+from functools import partial
 
 import os
 import sys
@@ -32,6 +33,8 @@ import warnings
 
 import dlib
 import skimage
+
+import argparse
 
 NCPUS=6
 
@@ -54,7 +57,7 @@ from skimage.color import rgb2gray
 from skimage.io import imread
 from skimage import img_as_ubyte
     
-def process_file(f):
+def process_file(f, verbose=False):
     # Cheat a bit to improve upsampling speed here...
     # img = imread(f)
     with warnings.catch_warnings():
@@ -62,15 +65,27 @@ def process_file(f):
         img = img_as_ubyte(rgb2gray(imread(f)), 2.0)
     #print(dir(img))
     dets = detector(img, 1) # Upsampling improves detection IME
-    if dets: # Found a sign
-        print(f, len(dets))
-    else:
+    if dets: # We found a sign (or more!)
+        print(f)
+        if verbose:
+            print('Found', len(dets), 'sign(s) in', f, 
+                  [str(x) for x in dets], file=sys.stderr)
+    elif verbose:
         print('No signs in', f, file=sys.stderr)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='detect images matching pattern')
+    parser.add_argument('-v', '--verbose', dest='verbose', default=False,
+                        action='store_true', help='include extra output to stderr')
+    parser.add_argument('files', metavar='FILE', type=str, nargs="+",
+                        help='files to scan')
+    args = parser.parse_args()
+
     filenames = []
-    for bit in sys.argv[1:]:
+    for bit in args.files:
         filenames.extend( glob.glob(bit) )
 
+    partial_process = partial(process_file, verbose=args.verbose)
+        
     p = Pool(NCPUS) ## Number of parallel processes to run
-    status = p.map(process_file, filenames)
+    status = p.map(partial_process, filenames)
