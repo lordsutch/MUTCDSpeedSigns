@@ -62,7 +62,7 @@ def process_file(f, verbose=False):
     # img = imread(f)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        img = img_as_ubyte(rgb2gray(imread(f)), 2.0)
+        img = img_as_ubyte(rgb2gray(imread(f)))
     #print(dir(img))
     dets = detector(img, 1) # Upsampling improves detection IME
     if dets: # We found a sign (or more!)
