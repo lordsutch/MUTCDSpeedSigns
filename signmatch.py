@@ -41,15 +41,8 @@ NCPUS=6
 # Now let's use the detector as you would in a normal application.  First we
 # will load it from disk.
 TRAINING='speedlimits.svm'
-DEBUG=False
 
 detector = dlib.simple_object_detector(TRAINING)
-
-if DEBUG:
-    # We can look at the HOG filter we learned.
-    win_det = dlib.image_window()
-    win_det.set_image(detector)
-    dlib.hit_enter_to_continue()
 
 # from skimage.transform import rescale, pyramid_expand
 from skimage import io
@@ -75,12 +68,22 @@ def process_file(f, verbose=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='detect images matching pattern')
+    parser.add_argument('-s', '--show-filter', dest='showfilter',
+                        default=False, action='store_true',
+                        help='show the filter that will be applied')
     parser.add_argument('-v', '--verbose', dest='verbose', default=False,
                         action='store_true', help='include extra output to stderr')
-    parser.add_argument('files', metavar='FILE', type=str, nargs="+",
+    parser.add_argument('files', metavar='FILE', type=str, nargs="*",
                         help='files to scan')
     args = parser.parse_args()
 
+    if args.showfilter:
+        # We can look at the HOG filter we learned.
+        win_det = dlib.image_window()
+        win_det.set_image(detector)
+        dlib.hit_enter_to_continue()
+        sys.exit(0)
+    
     filenames = []
     for bit in args.files:
         filenames.extend( glob.glob(bit) )
