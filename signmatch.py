@@ -35,6 +35,7 @@ import dlib
 import skimage
 
 import argparse
+import itertools
 
 NCPUS=6
 
@@ -51,7 +52,7 @@ from skimage.io import imread
 from skimage import img_as_ubyte
     
 def process_file(f, verbose=False):
-    # Cheat a bit to improve upsampling speed here...
+    # Cheat a bit to improve upsampling speed here... grayscale is faster
     # img = imread(f)
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
@@ -59,12 +60,13 @@ def process_file(f, verbose=False):
     #print(dir(img))
     dets = detector(img, 1) # Upsampling improves detection IME
     if dets: # We found a sign (or more!)
-        print(f)
         if verbose:
             print('Found', len(dets), 'sign(s) in', f, 
                   [str(x) for x in dets], file=sys.stderr)
+        return True
     elif verbose:
         print('No signs in', f, file=sys.stderr)
+    return False
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='detect images matching pattern')
@@ -92,3 +94,4 @@ if __name__ == '__main__':
         
     p = Pool(NCPUS) ## Number of parallel processes to run
     status = p.map(partial_process, filenames)
+    print("\n".join(itertools.compress(filenames, status)))
