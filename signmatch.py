@@ -63,10 +63,10 @@ def process_file(f, verbose=False):
         if verbose:
             print('Found', len(dets), 'sign(s) in', f, 
                   [str(x) for x in dets], file=sys.stderr)
-        return True
-    elif verbose:
+        return dets
+    if verbose:
         print('No signs in', f, file=sys.stderr)
-    return False
+    return []
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='detect images matching pattern')
