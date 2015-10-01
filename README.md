@@ -26,6 +26,15 @@ instructions in Ian Dees' Gist listed below through step 5. Then, use
 the `train_signmatch.py` script (for some reason, the classifiers from
 DLib are incompatible between C++ and Python).
 
+# Speedups
+
+On x86, you probably will want to enable AVX. This should be the
+default in dlib after version 18.17; until then, you'll need to do
+this manually by editing `compile_dlib_python_module.bat` to add
+`-DUSE_AVX_INSTRUCTIONS=ON` to the first `cmake` command so it reads:
+
+`cmake ../../tools/python -DUSE_AVX_INSTRUCTIONS=ON`
+
 # Credits
 
 All this depends on the awesome DLib project at
